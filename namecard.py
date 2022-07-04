@@ -35,45 +35,42 @@ class Namecard:
         return f'이름:{self.name}, 이메일:{self.email}, 전화번호:{self.phone}, 주소:{self.address}'
 
 
-
 def main():
    
     try:        
-        with open('addressbook.txt', 'rt') as file:     # file = open('addressbook.txt', 'rt') 이 후 file.close() 한 것과 같다.
-            lines = file.readlines()                    # 한 줄씩 리스트에 담아라
+        with open('addressbook.txt', 'rt', encoding='utf-8') as file:     # file = open('addressbook.txt', 'rt') 이 후 file.close() 한 것과 같다.
+            lines = file.readlines()                                      # 한 줄씩 리스트에 담아라
             # print(type(lines))                          
 
     except Exception as e:
         print('예외가 발생했습니다.', e)
 
-
     book = []
     for i in range(len(lines)):
         line = lines[i].split(',')
         namecard = Namecard(line[0], line[1], line[2], line[3])
-        book.append(namecard)           
-    
-    
+        book.append(namecard)         
+        
     # sqlite3(내장 모듈)를 임포트 하여 connect 메서드를 통해 커넥션 객체(con)를 생성
     con = sqlite3.connect('addr.db')    # 데이터베이스 접속  # 존재하지 않는 DB파일이면 새로 생성
     cursor = con.cursor()               # SQL 실행
-
     
-    cursor.execute('DROP TABLE IF EXISTS tblAddr')    # 테이블명 중복 방지
-    
-    cursor.execute(""" 
+    cursor.execute('DROP TABLE IF EXISTS tblAddr')    # 테이블명 중복 방지    
+    cursor.execute(
+        """ 
         CREATE TABLE tblAddr(                             
-        name CHAR(3) NOT NULL,
-        email CHAR(30),
-        phone CHAR(14),
-        addr TEXT
+            name CHAR(3) NOT NULL,
+            email CHAR(30),
+            phone CHAR(14),
+            addr TEXT
+        )
+        """
     )
-    """)
         
     for i in range(len(book)):
         print(book[i])
         cursor.execute("INSERT INTO tblAddr VALUES(?, ?, ?, ?)", (book[i].name, book[i].email, book[i].phone, book[i].address))
-
+    print('------------------------------------------------------------------------------')
 
     cursor.execute("SELECT * FROM tblAddr")
 
@@ -83,8 +80,8 @@ def main():
         print(record)
 
     con.commit()
-
     cursor.close()
     con.close()
+    
 
 main()
